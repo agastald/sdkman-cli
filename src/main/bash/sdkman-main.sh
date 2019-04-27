@@ -50,11 +50,11 @@ function sdk {
 	# Various sanity checks and default settings
 	#
 
-    # Check version and candidates cache
-    if [[ "$COMMAND" != "update" ]]; then
-        ___sdkman_check_candidates_cache "$SDKMAN_CANDIDATES_CACHE" || return 1
-        ___sdkman_check_version_cache
-    fi
+	# Check version and candidates cache
+	if [[ "$COMMAND" != "update" ]]; then
+		___sdkman_check_candidates_cache "$SDKMAN_CANDIDATES_CACHE" || return 1
+		___sdkman_check_version_cache
+	fi
 
 	# Always presume internet availability
 	SDKMAN_AVAILABLE="true"
@@ -115,14 +115,19 @@ function sdk {
 	# hence the name conversion as the first step here.
 	CONVERTED_CMD_NAME=$(echo "$COMMAND" | tr '-' '_')
 
+	# Store the return code of the requested command
+	local final_rc=0
+
 	# Execute the requested command
 	if [ -n "$CMD_FOUND" ]; then
 		# It's available as a shell function
 		__sdk_"$CONVERTED_CMD_NAME" "$QUALIFIER" "$3" "$4"
+		final_rc=$?
 	fi
 
 	# Attempt upgrade after all is done
 	if [[ "$COMMAND" != "selfupdate" ]]; then
 		__sdkman_auto_update "$SDKMAN_REMOTE_VERSION" "$SDKMAN_VERSION"
 	fi
+	return $final_rc
 }

@@ -43,10 +43,22 @@ function __sdkman_secure_curl_download {
 		curl_params="$curl_params --cookie $cookie"
 	fi
 
+	if [[ ! -z "${sdkman_curl_retry}" ]]; then
+		curl_params="--retry ${sdkman_curl_retry} ${curl_params}"
+	fi
+
+	if [[ ! -z "${sdkman_curl_retry_max_time}" ]]; then
+		curl_params="--retry-max-time ${sdkman_curl_retry_max_time} ${curl_params}"
+	fi
+
+	if [[ "${sdkman_curl_continue}" == 'true' ]]; then
+		curl_params="-C - ${curl_params}"
+	fi
+
 	if [[ "$zsh_shell" == 'true' ]]; then
-		curl ${=curl_params} "$1"
+		curl ${=curl_params} "$@"
 	else
-		curl ${curl_params} "$1"
+		curl ${curl_params} "$@"
 	fi
 }
 
@@ -105,12 +117,11 @@ function __sdkman_echo_confirm {
 }
 
 function __sdkman_legacy_bash_message {
-    if [[ "$bash_shell" == 'true' && -z "$(bash --version | grep 'GNU bash, version 4..*')" ]]; then
-        __sdkman_echo_red "An outdated version of bash was detected on your system!"
-        echo ""
-        __sdkman_echo_red "We recommend upgrading to bash 4.x, you have:"
-        echo ""
-        __sdkman_echo_yellow "  $(bash --version | grep 'GNU bash, version')"
-        echo ""
-    fi
+	__sdkman_echo_red "An outdated version of bash was detected on your system!"
+	echo ""
+	__sdkman_echo_red "We recommend upgrading to bash 4.x, you have:"
+	echo ""
+	__sdkman_echo_yellow "  $BASH_VERSION"
+	echo ""
+	__sdkman_echo_yellow "Need to use brute force to replace candidates..."
 }
